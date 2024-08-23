@@ -57,18 +57,3 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 	}
 
 }
-
-func (cfg *config) reachedMaxPages() bool{
-	cfg.mu.Lock()
-	defer cfg.mu.Unlock()
-	return len(cfg.pages) >= cfg.maxPages
-}
-
-func (cfg *config) addPageVisit(normalizedURL string) (isFirst bool) {
-	cfg.mu.Lock()
-	defer cfg.mu.Unlock()
-
-	_, visited := cfg.pages[normalizedURL]
-	cfg.pages[normalizedURL]++
-	return !visited
-}

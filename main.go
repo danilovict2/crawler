@@ -2,20 +2,10 @@ package main
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"strconv"
-	"sync"
 )
 
-type config struct {
-	pages              map[string]int
-	baseURL            *url.URL
-	mu                 sync.Mutex
-	concurrencyControl chan struct{}
-	wg                 sync.WaitGroup
-	maxPages int
-}
 
 func main() {
 	if len(os.Args) < 4 {
@@ -25,12 +15,6 @@ func main() {
 
 	if len(os.Args) > 4 {
 		fmt.Println("too many arguments provided")
-		os.Exit(1)
-	}
-
-	baseURL, err := url.Parse(os.Args[1])
-	if err != nil {
-		fmt.Printf("Error: couldn't parse URL '%s': %v\n", baseURL, err)
 		os.Exit(1)
 	}
 
@@ -46,15 +30,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg := &config {
-		pages: map[string]int{},
-		baseURL: baseURL,
-		concurrencyControl: make(chan struct{}, maxConcurrency),
-		maxPages: maxPages,
+	cfg, err := configure(os.Args[1], maxConcurrency, maxPages)
+	if err != nil {
+		fmt.Printf("Error - configure: %v", err)
+		return
 	}
 
 	cfg.wg.Add(1)
-	go cfg.crawlPage(baseURL.String())
+	go cfg.crawlPage(os.Args[1])
 	cfg.wg.Wait()
 
 	for key, val := range cfg.pages {
