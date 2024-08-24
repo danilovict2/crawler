@@ -40,7 +40,5 @@ func main() {
 	go cfg.crawlPage(os.Args[1])
 	cfg.wg.Wait()
 
-	for key, val := range cfg.pages {
-		fmt.Printf("Visited %s url %d times\n", key, val)
-	}
+	printReport(cfg.pages, os.Args[1])
 }
